@@ -32,6 +32,9 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+    def get_by_natural_key(self, username):
+        return self.get(username__iexact=username)
+
 
 def upload_location(instance, filename):
     new_path = os.path.join("users_avatars", str(instance.username), filename)
@@ -39,7 +42,7 @@ def upload_location(instance, filename):
 
 
 class Profile(AbstractBaseUser):
-    username = models.CharField(verbose_name='username', max_length=40, unique=True)
+    username = models.CharField(verbose_name='username', max_length=40, unique=True, null=False, blank=False)
     about = models.CharField(max_length=100, null=True, blank=True)
     avatar = models.ImageField(upload_to=upload_location, blank=True)
     city = models.CharField(max_length=20, null=True, blank=True)
@@ -72,6 +75,22 @@ class Profile(AbstractBaseUser):
     def has_module_perms(self, app_label):
         return True
 
+    def get_followers(self):
+        return self.followers.all()
+
+    def get_followings(self):
+        return self.followings.all()
+
+    def get_followers_count(self):
+        return self.followers.all().count()
+
+    def get_followings_count(self):
+        return self.followings.all().count()
+
+    def natural_key(self):
+        return (self.username,)
+
+    natural_key.dependencies = ['username']
     # def get_absolute_url(self):
     #     reverse("accounts:profile", kwargs={"username": self.username})
 
