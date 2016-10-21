@@ -30,6 +30,7 @@ class RegisterView(
         #     avatar=self.get_form_kwargs().get('files')['avatar'])
         # avatar.save()
         self.object.save()
+        messages.add_message(self.request, messages.SUCCESS, "Registration completed! Now log in")
         return super(RegisterView, self).form_valid(form)
 
 
@@ -48,16 +49,18 @@ class LoginProfileView(
 
         if user and user.is_active:
             login(self.request, user)
-            print("That's ok", user)
+            messages.add_message(self.request, messages.SUCCESS, "Great! Now you can use this service"
+                                                                 "like a pro")
             return super(LoginProfileView, self).form_valid(form)
         else:
             return self.form_invalid(form)
 
 
-@login_required
-def logout_profile(request):
-    logout(request)
-    return redirect(reverse_lazy('accounts:register'))
+class LogoutProfile(generic.View):
+    def dispatch(self, request, *args, **kwargs):
+        logout(request)
+        messages.add_message(request, messages.SUCCESS, "You've logged out successfully")
+        return redirect(reverse_lazy('accounts:register'))
 
 
 class ProfileDetailView(
@@ -130,9 +133,6 @@ class FollowingsListView(
         user_object = Profile.objects.get(username=username)
         return user_object.get_followings()
 
-    # def dispatch(self, request, *args, **kwargs):
-    #     return redirect('accounts:register')
-
 
 class UsersListView(
     views.LoginRequiredMixin,
@@ -142,4 +142,76 @@ class UsersListView(
     template_name = "accounts/users_list.html"
     context_object_name = "users"
     paginate_by = 10
+
+
+class FollowProfileView(
+    views.LoginRequiredMixin,
+    generic.View
+):
+
+    def get(self, request, *args, **kwargs):
+        self_user = Profile.objects.get(username=request.user)
+        try:
+            follow_user = Profile.objects.get(username=kwargs['username'])
+        except Profile.DoesNotExist:
+            messages.add_message(request, messages.ERROR, "Such user doesn't exist, sorry. "
+                                                          "Check out users on this page")
+            return redirect(reverse_lazy('accounts:users'))
+
+        if self_user.id == follow_user.id:
+            messages.add_message(request, messages.ERROR, "Follow yourself, seriously?")
+            redirect(self_user.get_absolute_url())
+
+        else:
+            follow_action, created = Relationship.objects.get_or_create(follower=self_user,
+                                                                        following=follow_user)
+
+            if created:
+                messages.add_message(request, messages.SUCCESS,
+                                     "Yeap, now you are following {}".format(follow_user.username))
+
+            else:
+                messages.add_message(request, messages.ERROR,
+                                     "You've already followed user {}".format(follow_user.username))
+
+        return redirect(self_user.get_absolute_url())
+
+    def post(self, request, **kwargs):
+        self_user = Profile.objects.get(username=request.user)
+        print(self_user)
+        return redirect(self_user.get_absolute_url())
+
+
+class UnfollowProfileView(
+    views.LoginRequiredMixin,
+    generic.View
+):
+    # will reverse methods in production, now this is for testing purposes
+    def get(self, request, *args, **kwargs):
+        self_user = Profile.objects.get(username=request.user)
+        try:
+            unfollow_user = Profile.objects.get(username=kwargs['username'])
+        except Profile.DoesNotExist:
+            messages.add_message(request, messages.ERROR, "Such user doesn't exist, sorry. "
+                                                          "Check out users on this page")
+            return redirect(reverse_lazy('accounts:users'))
+
+        if self_user.id == unfollow_user.id:
+            messages.add_message(request, messages.ERROR, "Unfollow yourself, seriously?")
+            redirect(self_user.get_absolute_url())
+        else:
+            try:
+                unfollow_action = Relationship.objects.get(follower=self_user, following=unfollow_user)
+            except Relationship.DoesNotExist:
+                messages.add_message(request, messages.ERROR, "First you need to follow this user!")
+                return redirect(unfollow_user.get_absolute_url())
+            unfollow_action.delete()
+            messages.add_message(request, messages.SUCCESS, "Successfully unfollowed "
+                                                          "{}".format(unfollow_user))
+        return redirect(self_user.get_absolute_url())
+
+    def post(self, request, **kwargs):
+        self_user = Profile.objects.get(username=request.user)
+        messages.add_message(request, messages.INFO, "To unfollow user use POST request ")
+        return redirect(self_user.get_absolute_url())
 
