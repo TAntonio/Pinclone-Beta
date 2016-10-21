@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h2>Followers: {{ followers_count }}</h2>
+    <h2>Following: {{ followings_count }}</h2>
+    <h2>Is friends: {{ is_followed }}</h2>
+    <h2>New Users:</h2>
+    {% for user in new_users %}
+        <p>{{ user.username }}</p>
+    {% endfor %}
+{{ user }}
+</body>
+</html>

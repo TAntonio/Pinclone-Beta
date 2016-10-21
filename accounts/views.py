@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout, get_user
 from django.http import HttpResponseRedirect, Http404
@@ -72,9 +73,9 @@ class ProfileDetailView(
     def get_context_data(self, **kwargs):
         context = super(ProfileDetailView, self).get_context_data(**kwargs)
         username = self.kwargs['username']
-
-        user = get_object_or_404(Profile, username=username)
         self_user = self.request.user
+        user = get_object_or_404(Profile, username=username)
+
         context['user'] = user
         context['self_user'] = self_user
         context['followers_count'] = user.get_followers_count()
@@ -86,15 +87,59 @@ class ProfileDetailView(
         else:
             is_following = False
 
-        context['is_followed'] = is_following
+        context['is_following'] = is_following
         return context
 
-        # context['boards'] =
 
 class ProfileUpdateView(
     views.LoginRequiredMixin,
-    generic.UpdateView
+    generic.UpdateView,
 ):
-    def post(self):
-        pass
+    # model = Profile
+    # form_class =
+    pass
+
+
+class FollowersListView(
+    views.LoginRequiredMixin,
+    generic.ListView
+):
+    model = Profile
+    template_name = "accounts/followers_list.html"
+    context_object_name = "followers"
+    paginate_by = 10
+
+    def get_queryset(self):
+        username = self.kwargs['username']
+        user_object = Profile.objects.get(username=username)
+        self_user = self.request.user
+        return user_object.get_followers()
+
+
+class FollowingsListView(
+    views.LoginRequiredMixin,
+    generic.ListView
+):
+    model = Profile
+    template_name = "accounts/followings_list.html"
+    context_object_name = "followings"
+    paginate_by = 10
+
+    def get_queryset(self):
+        username = self.kwargs['username']
+        user_object = Profile.objects.get(username=username)
+        return user_object.get_followings()
+
+    # def dispatch(self, request, *args, **kwargs):
+    #     return redirect('accounts:register')
+
+
+class UsersListView(
+    views.LoginRequiredMixin,
+    generic.ListView
+):
+    model = Profile
+    template_name = "accounts/users_list.html"
+    context_object_name = "users"
+    paginate_by = 10
 

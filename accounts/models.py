@@ -91,8 +91,9 @@ class Profile(AbstractBaseUser):
         return (self.username,)
 
     natural_key.dependencies = ['username']
-    # def get_absolute_url(self):
-    #     reverse("accounts:profile", kwargs={"username": self.username})
+
+    def get_absolute_url(self):
+        reverse("accounts:profile", kwargs={"username": self.username})
 
 
 class Relationship(models.Model):
