@@ -215,3 +215,5 @@ class UnfollowProfileView(
         messages.add_message(request, messages.INFO, "To unfollow user use POST request ")
         return redirect(self_user.get_absolute_url())
 
+
+
