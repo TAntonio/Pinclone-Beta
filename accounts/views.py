@@ -7,7 +7,7 @@ from django.views import generic
 from django.core.urlresolvers import reverse, reverse_lazy
 from braces import views
 from .models import Profile, Relationship
-from .forms import RegisterForm, LoginForm
+from .forms import RegisterForm, LoginForm, ProfileUpdateForm
 from .mixins import ProfileGetObjectMixin
 
 
@@ -30,7 +30,6 @@ class RegisterView(
         #     avatar=self.get_form_kwargs().get('files')['avatar'])
         # avatar.save()
         self.object.save()
-        messages.add_message(self.request, messages.SUCCESS, "Registration completed! Now log in")
         return super(RegisterView, self).form_valid(form)
 
 
@@ -96,11 +95,26 @@ class ProfileDetailView(
 
 class ProfileUpdateView(
     views.LoginRequiredMixin,
-    generic.UpdateView,
+    views.FormValidMessageMixin,
+    generic.UpdateView
 ):
-    # model = Profile
-    # form_class =
-    pass
+    model = Profile
+    form_class = ProfileUpdateForm
+    template_name = "accounts/profile_update.html"
+    slug_field = 'username'
+    slug_url_kwarg = 'username'
+    form_valid_message = "Successfully updated info of your account!"
+    context_object_name = 'user'
+
+    def get(self, request, *args, **kwargs):
+        if request.user.username != self.kwargs['username'] and request.user.is_superuser is False:
+            messages.add_message(request, messages.ERROR, "You don't have such permissions. "
+                                                          "Or you want to hack? Not this time:D")
+            return redirect(request.user.get_absolute_url())
+        return super(ProfileUpdateView, self).get(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse_lazy('accounts:users')
 
 
 class FollowersListView(

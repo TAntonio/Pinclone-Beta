@@ -71,3 +71,9 @@ class LoginForm(AuthenticationForm):
         widget=forms.PasswordInput(attrs={'placeholder': 'Password',
                                           'class': 'form-control'})
     )
+
+
+class ProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['username', 'about', 'city', 'avatar']

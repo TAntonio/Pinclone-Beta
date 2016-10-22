@@ -95,6 +95,12 @@ class Profile(AbstractBaseUser):
     def get_absolute_url(self):
         return reverse("accounts:profile", kwargs={"username": self.username})
 
+    def save(self, *args, **kwargs):
+        _object = Profile.objects.get(id=self.id)
+        if _object.avatar != self.avatar:
+            _object.avatar.delete(save=False)
+        return super(Profile, self).save(*args, **kwargs)
+
 
 class Relationship(models.Model):
     follower = models.ForeignKey(Profile, related_name="followings")
