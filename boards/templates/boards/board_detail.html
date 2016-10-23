@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Board detail</title>
+</head>
+<body>
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    <h2>{{ board.title }}</h2>
+    <h2>{{ board.slug }}</h2>
+    <h2>{{ board.description }}</h2>
+    <h2>{{ board.author }}</h2>
+    <h2>{{ board.is_private }}</h2>
+    <h2>{{ board.date_created }}</h2>
+    <h2>Followers:</h2>
+    {% for follower in board_followers %}
+        <h2>{{ follower.follower.username}} - {{ follower.follower.city}}</h2>
+    {% endfor %}
+</body>
+</html>

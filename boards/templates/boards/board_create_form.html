@@ -1,0 +1,31 @@
+{% load staticfiles %}
+        <form class="sign-box" action="{% url 'board:create' %}" method="POST">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="non-field-errors">
+                    {% for error in form.non_field_errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+
+            <div class="sign-avatar no-photo">&plus;</div>
+            <header class="sign-title">Create board</header>
+            <div class="form-group">
+                {{ form.title.errors }}
+                {{ form.title }}
+            </div>
+            <div class="form-group">
+                {{ form.description.errors }}
+                {{ form.description }}
+            </div>
+            <div class="form-group">
+                {{ form.is_private.errors }}
+                {{ form.is_private }}
+            </div>
+            <button type="submit" class="btn btn-rounded btn-success sign-up">Create board</button>
+
+        </form>

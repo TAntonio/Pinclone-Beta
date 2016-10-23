@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Boards list</title>
+</head>
+<body>
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% for board in user_boards %}
+        <a href="{% url 'board:detail' board.slug %}">{{ board.title }}<a>
+        <p>{{ board.author }}<p>
+        <p>{{ board.slug }}<p>
+        <p>{{ board.description }}<p>
+        <p>{{ board.is_private }}<p>
+        <p>{{ board.date_created }}<p>
+    {% endfor %}
+</body>
+</html>

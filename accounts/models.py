@@ -42,7 +42,7 @@ def upload_location(instance, filename):
 
 
 class Profile(AbstractBaseUser):
-    username = models.CharField(verbose_name='username', max_length=40, unique=True, null=False, blank=False)
+    username = models.CharField(verbose_name='username', max_length=40, unique=True)
     about = models.CharField(max_length=100, null=True, blank=True)
     avatar = models.ImageField(upload_to=upload_location, blank=True)
     city = models.CharField(max_length=20, null=True, blank=True)
@@ -96,10 +96,14 @@ class Profile(AbstractBaseUser):
         return reverse("accounts:profile", kwargs={"username": self.username})
 
     def save(self, *args, **kwargs):
-        _object = Profile.objects.get(id=self.id)
-        if _object.avatar != self.avatar:
-            _object.avatar.delete(save=False)
-        return super(Profile, self).save(*args, **kwargs)
+        try:
+            _object = Profile.objects.get(id=self.id)
+            if _object.avatar != self.avatar:
+                _object.avatar.delete(save=False)
+        except:
+            pass
+        finally:
+            return super(Profile, self).save(*args, **kwargs)
 
 
 class Relationship(models.Model):

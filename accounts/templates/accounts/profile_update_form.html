@@ -1,0 +1,36 @@
+{% load staticfiles %}
+        <form class="sign-box" action="{% url 'accounts:profile_update' user.username %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="non-field-errors">
+                    {% for error in form.non_field_errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+
+            <div class="sign-avatar no-photo">&plus;</div>
+            <header class="sign-title">Sign Up</header>
+            <div class="form-group">
+                {{ form.username.errors }}
+                {{ form.username }}
+            </div>
+            <div class="form-group">
+                {{ form.city.errors }}
+                {{ form.city }}
+            </div>
+            <div class="form-group">
+                {{ form.about.errors }}
+                {{ form.about }}
+            </div>
+            <div class="form-group">
+                {{ form.avatar.errors }}
+                <label for="{{ form.avatar.id_for_label }}" >Avatar:</label>
+                {{ form.avatar }}
+            </div>
+            <button type="submit" class="btn btn-rounded btn-success sign-up">Update</button>
+
+        </form>

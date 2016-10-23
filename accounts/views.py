@@ -106,15 +106,16 @@ class ProfileUpdateView(
     form_valid_message = "Successfully updated info of your account!"
     context_object_name = 'user'
 
-    def get(self, request, *args, **kwargs):
+    # get
+    def dispatch(self, request, *args, **kwargs):
         if request.user.username != self.kwargs['username'] and request.user.is_superuser is False:
             messages.add_message(request, messages.ERROR, "You don't have such permissions. "
                                                           "Or you want to hack? Not this time:D")
             return redirect(request.user.get_absolute_url())
-        return super(ProfileUpdateView, self).get(request, *args, **kwargs)
+        return super(ProfileUpdateView, self).dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
-        return reverse_lazy('accounts:users')
+        return self.object.get_absolute_url()
 
 
 class FollowersListView(
