@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'braces',
     'accounts',
     'boards',
+    'pins',
 ]
 
 MIDDLEWARE = [

@@ -163,3 +163,19 @@ class BoardUnfollowView(
 
         return redirect(board_to_unfollow.get_absolute_url())
 
+
+class ProfileBoardsListView(
+    views.LoginRequiredMixin,
+    generic.ListView
+):
+    model = Board
+    template_name = "boards/user_boards_list.html"
+    context_object_name = "boards"
+    paginate_by = 10
+
+    def get_queryset(self, **kwargs):
+        username = self.kwargs['username']
+        if self.request.user.username == username:
+            return Board.objects.filter(author__username=username)
+        else:
+            return Board.objects.filter(author__username=username, is_private=False)

@@ -13,12 +13,12 @@
     </ul>
     {% endif %}
     {% for board in user_boards %}
-        <a href="{% url 'board:detail' board.slug %}">{{ board.title }}<a>
-        <p>{{ board.author }}<p>
-        <p>{{ board.slug }}<p>
-        <p>{{ board.description }}<p>
-        <p>{{ board.is_private }}<p>
-        <p>{{ board.date_created }}<p>
+        <a href="{% url 'board:detail' board.slug %}">{{ board.title }}</a>
+        <a href="{% url 'accounts:profile' board.author.username %}"><p>{{ board.author }}</p></a>
+        <p>{{ board.slug }}</p>
+        <p>{{ board.description }}</p>
+        <p>{{ board.is_private }}</p>
+        <p>{{ board.date_created }}</p>
     {% endfor %}
 </body>
 </html>
