@@ -213,7 +213,7 @@ class UnfollowProfileView(
 
         if self_user.id == unfollow_user.id:
             messages.add_message(request, messages.ERROR, "Unfollow yourself, seriously?")
-            redirect(self_user.get_absolute_url())
+            return redirect(self_user.get_absolute_url())
         else:
             try:
                 unfollow_action = Relationship.objects.get(follower=self_user, following=unfollow_user)

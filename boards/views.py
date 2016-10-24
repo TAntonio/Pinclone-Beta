@@ -4,7 +4,8 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.contrib import messages
 from braces import views
-from .models import Board
+from accounts.models import Profile
+from .models import Board, BoardFollower
 from .forms import BoardCreateForm, BoardUpdateForm
 
 
@@ -100,3 +101,65 @@ class BoardDeleteView(
 
     def get_success_url(self):
         return reverse_lazy("board:list_of_user")
+
+
+class BoardFollowView(
+    views.LoginRequiredMixin,
+    generic.View
+):
+    def get(self, request, *args, **kwargs):
+        self_user = Profile.objects.get(username=request.user)
+        try:
+            board_to_follow = Board.objects.get(slug=kwargs['slug'])
+        except Board.DoesNotExist:
+            messages.add_message(request, messages.ERROR, "Can't find such board")
+            return redirect(reverse_lazy('board:list_of_user'))
+
+        if board_to_follow.author.id == self_user.id:
+            messages.add_message(request, messages.ERROR, "You can't follow your board! LoL")
+            return redirect(reverse_lazy('board:list_of_user'))
+        if board_to_follow.is_private is True:
+            messages.add_message(request, messages.ERROR, "You don't have permissions "
+                                                          "to follow this board")
+            return redirect(self_user.get_absolute_url())
+
+        is_following_board, created = BoardFollower.objects.get_or_create(follower=self_user,
+                                                                          board=board_to_follow)
+        if not created:
+            messages.add_message(request, messages.ERROR, "You've already followed this board")
+            return redirect(reverse_lazy('board:list_of_user'))
+        else:
+            messages.add_message(request, messages.ERROR, "You've successfully followed this board")
+        return redirect(board_to_follow.get_absolute_url())
+
+
+class BoardUnfollowView(
+    views.LoginRequiredMixin,
+    generic.View
+):
+    def get(self, request, *args, **kwargs):
+        self_user = Profile.objects.get(username=request.user)
+        try:
+            board_to_unfollow = Board.objects.get(slug=kwargs['slug'])
+        except Board.DoesNotExist:
+            messages.add_message(request, messages.ERROR, "Can't find such board")
+            return redirect(reverse_lazy('board:list_of_user'))
+
+        if board_to_unfollow.author.id == self_user.id:
+            messages.add_message(request, messages.ERROR, "You can't unfollow your board! LoL")
+            return redirect(reverse_lazy('board:list_of_user'))
+        if board_to_unfollow.is_private is True:
+            messages.add_message(request, messages.ERROR, "You don't have permissions "
+                                                          "to unfollow this board")
+            return redirect(self_user.get_absolute_url())
+
+        is_following_board = BoardFollower.objects.filter(follower=self_user,
+                                                          board=board_to_unfollow).exists()
+        if is_following_board:
+            BoardFollower.objects.get(follower=self_user, board=board_to_unfollow).delete()
+            messages.add_message(request, messages.ERROR, "You've successfully unfollow board")
+        else:
+            messages.add_message(request, messages.ERROR, "First you need to follow this board")
+
+        return redirect(board_to_unfollow.get_absolute_url())
+
