@@ -10,7 +10,7 @@ from braces import views
 from accounts.models import Profile
 from boards.models import Board
 from .models import Pin, Tag, PinBoard, md5
-from .forms import PinCreateForm
+from .forms import PinCreateForm, PinUpdateForm
 
 
 class PinCreateView(
@@ -60,29 +60,98 @@ class PinDetailView(
     views.LoginRequiredMixin,
     generic.DetailView
 ):
-
     model = Pin
     template_name = "pins/pin_detail.html"
     context_object_name = "pin"
 
     def get_context_data(self, **kwargs):
-        pin = self.get_object()
         context = super(PinDetailView, self).get_context_data(**kwargs)
-        context['likes'] = pin.get_likes()
-        context['tags'] = pin.get_tags()
-        context['comments'] = pin.get_comments()
-        #users that have pinned this pin object
+        self.pin = self.get_object()
+        pinboard = PinBoard.objects.get(user=self.pin.author, pin=self.pin)
+        context['likes'] = self.pin.get_likes()
+        context['tags'] = self.pin.get_tags()
+        context['comments'] = self.pin.get_comments()
+        # users that have pinned this pin object
         context['pinners'] = PinBoard.objects.filter(~Q(board__author=self.request.user),
-                                                     pin=pin)
+                                                     ~Q(board__author=self.pin.author),
+                                                     pin=self.pin)
         # boards that have this pin
         context['checkout_boards'] = PinBoard.objects.filter(~Q(board__author=self.request.user),
-                                                             pin__hash=pin.hash)
+                                                             ~Q(board=pinboard.board),
+                                                             pin__hash=self.pin.hash)
         return context
 
+    def get(self, request, *args, **kwargs):
+        pin = self.get_object()
+        pinboard = PinBoard.objects.filter(user=pin.author, pin=pin)
+        if pinboard:
+            if pin.author != request.user and pinboard[0].board.is_private:
+                messages.add_message(request, messages.ERROR, "You don't have permissions to view this pin")
+                return redirect(reverse_lazy("board:list_of_user"))
+        return super(PinDetailView, self).get(request, *args, **kwargs)
+
+
+class PinUpdateView(
+    views.LoginRequiredMixin,
+    views.FormValidMessageMixin,
+    generic.UpdateView
+):
+    model = Pin
+    form_class = PinUpdateForm
+    template_name = "pins/pin_update.html"
+    form_valid_message = "Pin was successfully updated"
+
+    def get_form_kwargs(self):
+        kwargs = super(PinUpdateView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        tags = form.cleaned_data['tags']
+        board = form.cleaned_data['board']
+        self.pin = form.save(commit=True)
+        if tags:
+            self.pin.delete_tags()
+            self.pin.create_tags(tags)
+        self.pin.save()
+        try:
+            PinBoard.objects.update(user=self.pin.author, pin=self.pin,
+                                    board=board)
+        except:
+            messages.add_message(self.request, messages.ERROR, "Can't update pin!")
+            return super(PinUpdateView, self).form_invalid(form)
+
+        return super(PinUpdateView, self).form_valid(form)
+
+    def get_success_url(self):
+        return self.pin.get_absolute_url()
+
+    def get(self, request, *args, **kwargs):
+        pin = self.get_object()
+        if request.user != pin.author:
+            messages.add_message(self.request, messages.ERROR, "You don't have permissions to"
+                                                               "delete this pin")
+            return redirect(pin.get_absolute_url())
+        return super(PinUpdateView, self).get(request, *args, **kwargs)
+
+
+class PinDeleteView(
+    views.LoginRequiredMixin,
+    views.FormValidMessageMixin,
+    generic.DeleteView
+):
+    model = Pin
+    template_name = "pins/pin_delete.html"
+    form_valid_message = "Pin was successfully deleted"
+
     def dispatch(self, request, *args, **kwargs):
-        no_permission = PinBoard.objects.filter(~Q(board__author=request.user), board__is_private=True)
-        if no_permission:
-            messages.add_message(request, messages.ERROR, "You don't have permissions to view this pin")
-            return redirect(reverse_lazy("board:list_of_user"))
-        return super(PinDetailView, self).dispatch(request, *args, **kwargs)
+        pin = self.get_object()
+        if request.user != pin.author:
+            messages.add_message(self.request, messages.ERROR, "You don't have permissions to"
+                                                               "delete this pin")
+            return redirect(pin.get_absolute_url())
+        return super(PinDeleteView, self).dispatch(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse_lazy("board:list_of_user")
 

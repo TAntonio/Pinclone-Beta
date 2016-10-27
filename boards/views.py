@@ -33,6 +33,11 @@ class BoardCreateView(
     template_name = "boards/board_create.html"
     form_valid_message = "Great! You've created new board"
 
+    def get_form_kwargs(self):
+        kwargs = super(BoardCreateView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.author = self.request.user
@@ -74,6 +79,11 @@ class BoardUpdateView(
     template_name = "boards/board_update.html"
     form_valid_message = "Successfully updated your board!"
     context_object_name = "board"
+
+    def get_form_kwargs(self):
+        kwargs = super(BoardUpdateView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def dispatch(self, request, *args, **kwargs):
         board_obj = self.get_object()

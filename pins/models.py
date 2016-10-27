@@ -47,6 +47,9 @@ class Pin(models.Model):
         for tag in tag_list:
             tag, created = Tag.objects.get_or_create(tag=tag.lower(), pin=self)
 
+    def delete_tags(self):
+        return self.pin_tags.all().delete()
+
     # delete image after deletion of pin object
     @staticmethod
     def delete_image(sender, instance, **kwargs):

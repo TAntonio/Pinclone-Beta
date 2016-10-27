@@ -13,6 +13,8 @@
     </ul>
     {% endif %}
     <h2>Title: {{ pin.title }}</h2>
+    <h2>Pin:</h2>
+    <img src="{{ pin.image.url }}" />
     <h2>Author: {{ pin.author }}</h2>
     <h2>Date created: {{ pin.date_created }}</h2>
     <h2>Likes: {{ likes.count }}</h2>
@@ -32,7 +34,6 @@
     {% for board in checkout_boards %}
         <h4>{{ board }}</h4>
     {% endfor %}
-    <img src="{{ pin.image.url }}" />
 {#    <h2>{{ board.slug }}</h2>#}
 {#    <h2>{{ board.description }}</h2>#}
 {#    <h2>{{ board.author }}</h2>#}
