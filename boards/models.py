@@ -11,9 +11,9 @@ def uuid_generate():
 
 class Board(models.Model):
     title = models.CharField(max_length=12)
-    slug = models.CharField(max_length=12, unique=True, default=uuid_generate)
+    slug = models.SlugField(max_length=12, unique=True, default=uuid_generate)
     description = models.CharField(max_length=80, blank=True)
-    author = models.ForeignKey(Profile, related_name='author')
+    author = models.ForeignKey(Profile, related_name='author_boards')
     date_created = models.DateTimeField(auto_now_add=True)
     date_changed = models.DateTimeField(auto_now=True)
     is_private = models.BooleanField(default=False)

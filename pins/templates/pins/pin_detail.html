@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pin detail</title>
+</head>
+<body>
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    <h2>Title: {{ pin.title }}</h2>
+    <h2>Author: {{ pin.author }}</h2>
+    <h2>Date created: {{ pin.date_created }}</h2>
+    <h2>Likes: {{ likes.count }}</h2>
+    <h2>Tags:</h2>
+    {% for tag in tags %}
+        <h4>{{ tag }}</h4>
+    {% endfor %}
+    <h2>Comments:</h2>
+    {% for comment in comments %}
+        <h4>{{ comment }}</h4>
+    {% endfor %}
+    <h2>Pinners:</h2>
+    {% for pinner in pinners %}
+        <h4>{{ pinner }}</h4>
+    {% endfor %}
+    <h2>Checkout boards:</h2>
+    {% for board in checkout_boards %}
+        <h4>{{ board }}</h4>
+    {% endfor %}
+    <img src="{{ pin.image.url }}" />
+{#    <h2>{{ board.slug }}</h2>#}
+{#    <h2>{{ board.description }}</h2>#}
+{#    <h2>{{ board.author }}</h2>#}
+{#    <h2>{{ board.is_private }}</h2>#}
+{#    <h2>{{ board.date_created }}</h2>#}
+{#    <h2>Followers:</h2>#}
+{#    {% for follower in board_followers %}#}
+{#        <h2>{{ follower.follower.username}} - {{ follower.follower.city}}</h2>#}
+{#    {% endfor %}#}
+{#</body>#}
+</html>
