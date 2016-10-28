@@ -1,16 +1,17 @@
 import os
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.views import generic
 from django.contrib import messages
 from django.db.models import Q
 from django.conf import settings
 from braces import views
 from accounts.models import Profile
+from boards.models import BoardFollower
 from boards.models import Board
 from .models import Pin, Tag, PinBoard, md5
-from .forms import PinCreateForm, PinUpdateForm
+from .forms import PinCreateForm, PinUpdateForm, PinImageForm
 
 
 class PinCreateView(
@@ -33,16 +34,15 @@ class PinCreateView(
         # model form obj with attributes
         # print(form.instance.slug)
         tags = form.cleaned_data['tags']
+        # saved as a model object and we can use it like form.cleaned_data['board'].author
+        # so it's a board object
         board = form.cleaned_data['board']
-        print(tags)
         self.object = form.save(commit=False)
         self.object.author = self.request.user
         self.object.image = self.request.FILES['image']
         self.object.save()
         if tags:
             self.object.create_tags(tags)
-        # saved as a model object and we can use it like form.cleaned_data['board'].author
-        # so it's a board object
         try:
             PinBoard.objects.create(user=self.object.author, pin=self.object,
                                     board=board)
@@ -155,3 +155,88 @@ class PinDeleteView(
     def get_success_url(self):
         return reverse_lazy("board:list_of_user")
 
+
+class PinImageView(
+    views.LoginRequiredMixin,
+    views.FormValidMessageMixin,
+    generic.CreateView
+):
+    model = PinBoard
+    form_class = PinImageForm
+    template_name = "pins/pin_image.html"
+    context_object_name = 'pin'
+    form_valid_message = "Yeah! You've pinned this image!"
+
+    # send pin obj to template because of url reverse on post request
+    def get_context_data(self, **kwargs):
+        context = super(PinImageView, self).get_context_data(**kwargs)
+        pin = self.get_object()
+        context['pin'] = pin
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super(PinImageView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        print(kwargs, self.get_slug_field(), self.get_object())
+        return kwargs
+
+    def get_object(self, queryset=None):
+        slug = self.kwargs.get(self.slug_url_kwarg)
+        pin = Pin.objects.get(slug=slug)
+        return pin
+
+    def form_valid(self, form):
+        pin_obj = self.get_object()
+        user = self.request.user
+        board = form.cleaned_data['board']
+        if PinBoard.objects.filter(pin=pin_obj, user=user, board=board):
+            messages.add_message(self.request, messages.ERROR, "You've already pinned this image")
+            return super(PinImageView, self).form_invalid(form)
+        pinboard = form.save(commit=False)
+        pinboard.pin = pin_obj
+        pinboard.board = board
+        pinboard.user = user
+        pinboard.save()
+
+        return super(PinImageView, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('board:list_of_user')
+
+
+class UnpinImageView(
+    views.LoginRequiredMixin,
+    generic.View
+):
+    # post for production
+    def get(self, request, *args, **kwargs):
+        slug = self.kwargs.get('slug')
+        pin = get_object_or_404(Pin, slug=slug)
+        exists = PinBoard.objects.filter(user=self.request.user, pin=pin)
+        if exists:
+            exists.delete()
+            messages.add_message(self.request, messages.SUCCESS, "You've successfully unpinned")
+        else:
+            messages.add_message(self.request, messages.ERROR, "First you have to pin this image")
+        return redirect(reverse_lazy('board:list_of_user'))
+
+
+class FeedView(
+    views.LoginRequiredMixin,
+    generic.ListView
+):
+    model = PinBoard
+    template_name = "pins/feed_list.html"
+    context_object_name = "pins"
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super(FeedView, self).get_context_data(**kwargs)
+        following_boards = BoardFollower.objects.filter(follower=self.request.user)
+        pins_list = []
+        for board in following_boards:
+            pins = PinBoard.objects.filter(board=board.board)
+            pins_list.append(pins)
+        print(pins_list[0][0].pin.slug)
+        context['pins'] = pins_list
+        return context

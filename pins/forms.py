@@ -76,3 +76,20 @@ class PinUpdateForm(forms.ModelForm):
         if same_name:
             raise forms.ValidationError("Please, change title of the pin, because the same name"
                                         "already exists", code='3')
+        return self.cleaned_data
+
+
+class PinImageForm(forms.ModelForm):
+
+    class Meta:
+        model = PinBoard
+        fields = ['board']
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        # pins = Pin.objects.all()
+        super(PinImageForm, self).__init__(*args, **kwargs)
+        self.fields['board'] = forms.ModelChoiceField(queryset=self.user.author_boards.all(),
+                                                      required=True)
+        # self.fields['pin'] = forms.ModelChoiceField(queryset=pins,
+        #                                             required=True)
