@@ -6,6 +6,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.views import generic
 from django.core.urlresolvers import reverse, reverse_lazy
 from braces import views
+from boards.models import Board, BoardFollower
 from .models import Profile, Relationship
 from .forms import RegisterForm, LoginForm, ProfileUpdateForm
 from .mixins import ProfileGetObjectMixin
@@ -163,9 +164,9 @@ class FollowProfileView(
     views.LoginRequiredMixin,
     generic.View
 ):
-
+    # will change for POST in production, now this is for testing purposes
     def get(self, request, *args, **kwargs):
-        self_user = Profile.objects.get(username=request.user)
+        self_user = request.user
         try:
             follow_user = Profile.objects.get(username=kwargs['username'])
         except Profile.DoesNotExist:
@@ -180,7 +181,12 @@ class FollowProfileView(
         else:
             follow_action, created = Relationship.objects.get_or_create(follower=self_user,
                                                                         following=follow_user)
-
+            # if follow user - follow all boards that this user has except private
+            boards_to_follow = Board.objects.filter(author=follow_user, is_private=False)
+            if boards_to_follow:
+                for board in boards_to_follow:
+                    _, followed = BoardFollower.objects.get_or_create(follower=self_user,
+                                                                      board=board)
             if created:
                 messages.add_message(request, messages.SUCCESS,
                                      "Yeap, now you are following {}".format(follow_user.username))
@@ -189,21 +195,15 @@ class FollowProfileView(
                 messages.add_message(request, messages.ERROR,
                                      "You've already followed user {}".format(follow_user.username))
 
-        return redirect(self_user.get_absolute_url())
-
-    def post(self, request, **kwargs):
-        self_user = Profile.objects.get(username=request.user)
-        print(self_user)
-        return redirect(self_user.get_absolute_url())
+        return redirect(follow_user.get_absolute_url())
 
 
 class UnfollowProfileView(
     views.LoginRequiredMixin,
     generic.View
 ):
-    # will reverse methods in production, now this is for testing purposes
     def get(self, request, *args, **kwargs):
-        self_user = Profile.objects.get(username=request.user)
+        self_user = request.user
         try:
             unfollow_user = Profile.objects.get(username=kwargs['username'])
         except Profile.DoesNotExist:
@@ -221,14 +221,17 @@ class UnfollowProfileView(
                 messages.add_message(request, messages.ERROR, "First you need to follow this user!")
                 return redirect(unfollow_user.get_absolute_url())
             unfollow_action.delete()
+            # if unfollow user - also unfollow all of his boards
+            boards_to_unfollow = Board.objects.filter(author=unfollow_user, is_private=False)
+            if boards_to_unfollow:
+                for board in boards_to_unfollow:
+                    followed_boards = BoardFollower.objects.filter(follower=self_user,
+                                                                   board=board)
+                    followed_boards.delete()
             messages.add_message(request, messages.SUCCESS, "Successfully unfollowed "
                                                           "{}".format(unfollow_user))
-        return redirect(self_user.get_absolute_url())
+        return redirect(unfollow_user.get_absolute_url())
 
-    def post(self, request, **kwargs):
-        self_user = Profile.objects.get(username=request.user)
-        messages.add_message(request, messages.INFO, "To unfollow user use POST request ")
-        return redirect(self_user.get_absolute_url())
 
 
 

@@ -13,12 +13,14 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url, include
+from django.conf.urls import url, include, handler400, handler403, handler404, handler500
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from pins.views import FeedView
 
+handler404 = 'pins.views.page_not_found'
+handler500 = 'pins.views.server_error'
 
 urlpatterns = [
     # url(r'^$', views.home, name='home'),
@@ -28,3 +30,4 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^feed/', FeedView.as_view(), name='feed')
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

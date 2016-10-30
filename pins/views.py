@@ -1,7 +1,8 @@
 import os
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404, render
+from django.template import RequestContext
 from django.views import generic
 from django.contrib import messages
 from django.db.models import Q
@@ -240,3 +241,26 @@ class FeedView(
         print(pins_list[0][0].pin.slug)
         context['pins'] = pins_list
         return context
+
+
+class PinsByTagView(
+    views.LoginRequiredMixin,
+    generic.ListView
+):
+    model = Tag
+    template_name = "pins/pins_by_tag_list.html"
+    context_object_name = 'pins'
+    paginate_by = 10
+
+    def get_queryset(self):
+        tag = self.kwargs.get('slug')
+        pins = Tag.objects.filter(tag__iexact=tag)
+        if pins:
+            return pins
+
+
+def page_not_found(request):
+    return render(request, 'error-404.html')
+
+def server_error(request):
+    return render(request, 'error-500.html')
