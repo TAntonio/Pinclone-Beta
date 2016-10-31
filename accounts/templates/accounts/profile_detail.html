@@ -5,19 +5,26 @@
     <title>Title</title>
 </head>
 <body>
-    {% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
+    {% include 'base_messages.html' %}
     <h2>Followers: {{ followers_count }}</h2>
     <h2>Following: {{ followings_count }}</h2>
     <h2>Is friends: {{ is_followed }}</h2>
     <h2>New Users:</h2>
     {% for user in new_users %}
         <p>{{ user.username }}</p>
+    {% endfor %}
+    <h2>Boards: {{ boards.count }}</h2>
+
+    {% for board, pins in boards_pins %}
+        <h2>Board: {{ board }}</h2>
+        {% if pins %}
+            {% for pin in pins %}
+                <h2>{{ pin.pin }}</h2>
+                <img src="{{ pin.pin.image.url }}">
+            {% endfor %}
+        {% else %}
+            <h2>There's no pins</h2>
+        {% endif %}
     {% endfor %}
 </body>
 </html>

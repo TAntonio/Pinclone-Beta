@@ -17,13 +17,15 @@ from django.conf.urls import url, include, handler400, handler403, handler404, h
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
+from accounts.views import HomepageView
 from pins.views import FeedView
+
 
 handler404 = 'pins.views.page_not_found'
 handler500 = 'pins.views.server_error'
 
 urlpatterns = [
-    # url(r'^$', views.home, name='home'),
+    url(r'^$', HomepageView.as_view(), name='home'),
     url(r'^accounts/', include('accounts.urls')),
     url(r'^boards/', include('boards.urls')),
     url(r'^pins/', include('pins.urls')),

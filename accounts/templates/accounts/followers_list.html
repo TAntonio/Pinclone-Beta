@@ -2,21 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Followers</title>
 </head>
 <body>
+    {% include 'base_messages.html' %}
     {% for follower in followers %}
         <p>{{ follower.follower.username }}</p>
         <span>{{ follower.follower.city }}</span>
     {% endfor %}
-    {% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
 
-    {% include 'accounts/pagination.html' %}
+    {% include 'base_pagination.html' %}
 </body>
 </html>

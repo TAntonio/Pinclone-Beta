@@ -5,13 +5,7 @@
     <title>Board detail</title>
 </head>
 <body>
-    {% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
+    {% include 'base_messages.html' %}
     <h2>{{ board.title }}</h2>
     <h2>{{ board.slug }}</h2>
     <h2>{{ board.description }}</h2>

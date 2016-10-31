@@ -1,0 +1,256 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+
+<head>
+
+	<meta charset="utf-8">
+
+	<title>Title</title>
+	<meta name="description" content="">
+
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<!-- Template Basic Images Start -->
+	<meta property="og:image" content="path/to/image.jpg">
+	<link rel="shortcut icon" href="img/favicon/favicon.ico" type="image/x-icon">
+	<link rel="apple-touch-icon" href="img/favicon/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="img/favicon/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="img/favicon/apple-touch-icon-114x114.png">
+
+	<!-- Load CSS, CSS Localstorage & WebFonts Main Function -->
+	<script>!function(e){"use strict";function t(e,t,n){e.addEventListener?e.addEventListener(t,n,!1):e.attachEvent&&e.attachEvent("on"+t,n)};function n(t,n){return e.localStorage&&localStorage[t+"_content"]&&localStorage[t+"_file"]===n};function a(t,a){if(e.localStorage&&e.XMLHttpRequest)n(t,a)?o(localStorage[t+"_content"]):l(t,a);else{var s=r.createElement("link");s.href=a,s.id=t,s.rel="stylesheet",s.type="text/css",r.getElementsByTagName("head")[0].appendChild(s),r.cookie=t}}function l(e,t){var n=new XMLHttpRequest;n.open("GET",t,!0),n.onreadystatechange=function(){4===n.readyState&&200===n.status&&(o(n.responseText),localStorage[e+"_content"]=n.responseText,localStorage[e+"_file"]=t)},n.send()}function o(e){var t=r.createElement("style");t.setAttribute("type","text/css"),r.getElementsByTagName("head")[0].appendChild(t),t.styleSheet?t.styleSheet.cssText=e:t.innerHTML=e}var r=e.document;e.loadCSS=function(e,t,n){var a,l=r.createElement("link");if(t)a=t;else{var o;o=r.querySelectorAll?r.querySelectorAll("style,link[rel=stylesheet],script"):(r.body||r.getElementsByTagName("head")[0]).childNodes,a=o[o.length-1]}var s=r.styleSheets;l.rel="stylesheet",l.href=e,l.media="only x",a.parentNode.insertBefore(l,t?a:a.nextSibling);var c=function(e){for(var t=l.href,n=s.length;n--;)if(s[n].href===t)return e();setTimeout(function(){c(e)})};return l.onloadcssdefined=c,c(function(){l.media=n||"all"}),l},e.loadLocalStorageCSS=function(l,o){n(l,o)||r.cookie.indexOf(l)>-1?a(l,o):t(e,"load",function(){a(l,o)})}}(this);</script>
+
+    <link rel="stylesheet" href="{% static 'css/my_fonts.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/my_main.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/my_header.min.css' %}">
+
+</head>
+
+<body class="ishome">
+
+	<header class="main-head">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="head-wrapper clearfix">
+					<div class="col-md-1">
+						<a href="#" class="logo">PinClone</a>
+					</div>
+					<div class="col-md-4">
+						<div class="search-box">
+							<div class="search-form-container">
+								<i class="fa fa-search"></i>
+								<input type="search" class="search" placeholder="Search..."></input>
+								<i class="fa fa-angle-down"></i>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-5">
+						<div class="menu">
+							<ul>
+								<li><a href="{% url 'feed' %}">Newsfeed</a></li>
+								<li><a href="{% url 'board:list_of_user' %}">My Boards</a></li>
+								<li><a href="{% url 'board:create' %}">Create board</a></li>
+								<li><a href="{% url 'pins:create' %}">Upload pin</a></li>
+							</ul>
+						</div>
+					</div>
+					<div class="col-md-2">
+						<div class="info-panel clearfix">
+							<a href="#" class="profile-icon" style="background-image: url('{{ self_user.avatar.url }}')">
+								<!-- <img src="img/girl_avatar.jpg" alt="girl"> -->
+							</a>
+							<a href="#" class="notification-icon">
+								<i class="fa fa-comments-o"></i>
+							</a>
+						</div>
+					</div>
+
+				</div>
+			</div>
+
+		</div>
+
+	</header>
+
+	<section class="main">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-3">
+					<div class="left-section-wrap">
+						<div class="profile-section">
+							<!-- <img src="#" alt=""> -->
+							<div class="avatar" style="background-image: url('{{ user.avatar.url }}')"></div>
+							<h1 class="username">{{ user.username|capfirst }}</h1>
+							<h4 class="city">{{ user.city|capfirst }}</h4>
+							<p class="user-about">
+                                {{ user.about }}
+							</p>
+							<div class="social-links clearfix">
+								<div class="instagram-icon">
+									<i class="fa fa-instagram"></i>
+								</div>
+								<div class="facebook-icon">
+									<i class="fa fa-facebook-official"></i>
+								</div>
+							</div>
+
+                            {% if self_user == user %}
+                                <a href="#" class="button">Me</a>
+                            {% elif is_following %}
+                                <a href="#" class="button">Unfollow</a>
+                            {% else %}
+                               <a href="#" class="button">Follow</a>
+                            {% endif %}
+
+						</div>
+						<div class="recommendation-section">
+							<div class="recom-title">
+								<h3>New users</h3>
+							</div>
+							<div class="users-info">
+                                {% for user in new_users %}
+                                <div class="user-item" id="{{ counter }}">
+                                    <div class="user-avatar">
+                                        <a href="#">
+                                            {% if user.avatar %}
+                                                <img src="{{ user.avatar.url }}" alt="user_{{ counter }}">
+                                            {% else %}
+                                                <i class="fa fa-user" aria-hidden="true" style="font-size: 40px"></i>
+                                            {% endif %}
+                                        </a>
+                                    </div>
+                                    <div class="info">
+                                        <h3>{{ user.username|capfirst }}</h3>
+                                        <a href="#"><h4>{{ user.author_boards.count }} boards</h4></a>
+                                        <a href="#"><h4 class="followers">{{ user.followers.count }} followers</h4></a>
+                                    </div>
+                                </div>
+                                {% endfor %}
+
+							</div>
+
+						</div>
+
+					</div>
+
+
+				</div>
+
+				<div class="col-md-9">
+					<div class="right-section-wrap">
+						<div class="info-bar">
+							<ul>
+								<li><a href="#"><h1>{{ boards.count }}</h1>boards</a></li>
+								<li><a href="#"><h1>{{ pins_count }}</h1>pins</a></li>
+								<li><a href="#"><h1>{{ likes_count }}</h1>likes</a></li>
+								<li><a href="#"><h1>{{ followers_count }}</h1>followers</a></li>
+								<li><a href="#"><h1>{{ followings_count }}</h1>following</a></li>
+							</ul>
+						</div>
+
+						<div class="row">
+							<div class="boards-wrap">
+								<div class="top-boards clearfix">
+                                    {% for board, pins, pins_count in boards_pins|slice:":2" %}
+									<div class="col-md-6">
+										<div class="board-item" id="board_{{ counter }}">
+											<div class="board-inner-wrap">
+												<div class="top-bar">
+													<div class="board-info">
+														<h1 class="board-name">{{ board.title|capfirst }}</h1>
+														<span class="pins"> {{ pins_count }} pins</span>
+														<span class="followers">{{ board.board_followers.count }} followers</span>
+													</div>
+
+													<a href="#" class="subscribe-board-button">
+														<i class="fa fa-plus"></i>
+													</a>
+												</div>
+												<div class="images-bar">
+                                                {% if pins %}
+
+                                                    <div class="images-wrapper clearfix">
+                                                        <a href="#" class="image-top">
+                                                            <img src="{{ pins.0.pin.image.url }}" alt="pin">
+                                                        </a>
+                                                        {% for pin in pins|slice:"1:3" %}
+                                                            <a href="#" class="image">
+                                                                <img src="{{ pin.pin.image.url }}" alt="pin">
+                                                            </a>
+                                                        {% endfor %}
+                                                    </div>
+
+                                                {% endif %}
+												</div>
+										</div>
+									</div>
+
+									</div>
+                                    {% endfor %}
+								</div>
+
+                                {% if boards|length > 2 %}
+								<div class="bottom-boards">
+                                {% for board, pins, pins_count in boards_pins|slice:"2:" %}
+									<div class="col-md-6">
+										<div class="board-item">
+											<div class="board-inner-wrap">
+											<div class="top-bar">
+												<div class="board-info">
+                                                    <h1 class="board-name">{{ board.title|capfirst }}</h1>
+                                                    <span class="pins"> {{ pins_count }} pins</span>
+                                                    <span class="followers">{{ board.board_followers.count }} followers</span>
+												</div>
+
+												<a href="#" class="subscribe-board-button">
+													<i class="fa fa-plus"></i>
+												</a>
+											</div>
+											<div class="images-bar">
+                                                {% if pins %}
+
+                                                    <div class="images-wrapper clearfix">
+                                                        <a href="#" class="image-top">
+                                                            <img src="{{ pins.0.pin.image.url }}" alt="pin">
+                                                        </a>
+                                                        {% for pin in pins|slice:"1:3" %}
+                                                            <a href="#" class="image">
+                                                                <img src="{{ pin.pin.image.url }}" alt="pin">
+                                                            </a>
+                                                        {% endfor %}
+                                                    </div>
+
+                                                {% endif %}
+											</div>
+										</div>
+									</div>
+									</div>
+                                    {% endfor %}
+								</div>
+                                {% endif %}
+							</div>
+
+						</div>
+
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+
+	</section>
+
+
+	<!-- Optimized loading JS Start -->
+	<script>var scr = {"scripts":[
+		{"src" : "{% static 'js/my_libs.min.js' %}", "async" : false},
+		{"src" : "{% static 'js/my_common.js' %}", "async" : false}
+		]};!function(t,n,r){"use strict";var c=function(t){if("[object Array]"!==Object.prototype.toString.call(t))return!1;for(var r=0;r<t.length;r++){var c=n.createElement("script"),e=t[r];c.src=e.src,c.async=e.async,n.body.appendChild(c)}return!0};t.addEventListener?t.addEventListener("load",function(){c(r.scripts);},!1):t.attachEvent?t.attachEvent("onload",function(){c(r.scripts)}):t.onload=function(){c(r.scripts)}}(window,document,scr);
+	</script>
+	<!-- Optimized loading JS End -->
+
+</body>
+</html>

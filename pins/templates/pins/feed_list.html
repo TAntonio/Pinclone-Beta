@@ -5,18 +5,15 @@
     <title>Title</title>
 </head>
 <body>
-    {% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
+    {% include 'base_messages.html' %}
+
     {% for pin in pins %}
         {% for p in pin %}
             <p>{{ p.pin.title }}</p>
             <img src="{{ p.pin.image.url }}" />
         {% endfor %}
     {% endfor %}
+
+    {% include 'base_pagination.html' %}
 </body>
 </html>

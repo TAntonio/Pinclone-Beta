@@ -1,4 +1,4 @@
-{% extends 'accounts/base_register_login.html' %}
+{% extends 'base_form_page.html' %}
 
 {% block title %}Login{% endblock %}
 
@@ -6,6 +6,7 @@
     <div class="page-center">
         <div class="page-center-in">
             <div class="container-fluid">
+                {% include 'base_messages.html' %}
                 {% include "accounts/login_form.html" %}
             </div>
         </div>

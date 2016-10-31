@@ -74,6 +74,19 @@ class LoginForm(AuthenticationForm):
 
 
 class ProfileUpdateForm(forms.ModelForm):
+    username = forms.CharField(label='username',
+                               widget=forms.TextInput(attrs={'placeholder': 'Username',
+                                                             'class': 'form-control'}))
+    about = forms.CharField(label='about',
+                            widget=forms.TextInput(attrs={'placeholder': 'About',
+                                                          'class': 'form-control'}))
+
+    city = forms.CharField(label='city',
+                           widget=forms.TextInput(attrs={'placeholder': 'City',
+                                                         'class': 'form-control'}))
+    avatar = forms.ImageField(label='avatar',
+                              widget=forms.FileInput(attrs={'class': 'input-file'}))
+
     class Meta:
         model = Profile
         fields = ['username', 'about', 'city', 'avatar']

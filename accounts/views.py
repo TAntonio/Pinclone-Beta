@@ -3,13 +3,23 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout, get_user
 from django.http import HttpResponseRedirect, Http404
+from django.db.models import Q
 from django.views import generic
 from django.core.urlresolvers import reverse, reverse_lazy
 from braces import views
 from boards.models import Board, BoardFollower
+from pins.models import PinBoard, Pin, Like
 from .models import Profile, Relationship
 from .forms import RegisterForm, LoginForm, ProfileUpdateForm
 from .mixins import ProfileGetObjectMixin
+
+
+class HomepageView(
+    views.LoginRequiredMixin,
+    generic.View
+):
+    def get(self, request, *args, **kwargs):
+        return redirect(request.user.get_absolute_url())
 
 
 class RegisterView(
@@ -24,13 +34,7 @@ class RegisterView(
     template_name = 'accounts/register.html'
 
     def form_valid(self, form):
-        # self.object = form.save(self.request)
-        self.object = form.save(commit=False)
-
-        # avatar = Profile(
-        #     avatar=self.get_form_kwargs().get('files')['avatar'])
-        # avatar.save()
-        self.object.save()
+        self.object = form.save(commit=True)
         return super(RegisterView, self).form_valid(form)
 
 
@@ -71,19 +75,31 @@ class ProfileDetailView(
     model = Profile
     slug_field = 'username'
     slug_url_kwarg = 'username'
-    template_name = 'accounts/profile_detail.html'
+    template_name = 'accounts/profile_detail_new.html'
 
     def get_context_data(self, **kwargs):
         context = super(ProfileDetailView, self).get_context_data(**kwargs)
         username = self.kwargs['username']
         self_user = self.request.user
         user = get_object_or_404(Profile, username=username)
+        if self_user == user:
+            boards = Board.objects.filter(author=user)
+        else:
+            boards = Board.objects.filter(author=user, is_private=False)
 
         context['user'] = user
         context['self_user'] = self_user
         context['followers_count'] = user.get_followers_count()
         context['followings_count'] = user.get_followings_count()
-        context['new_users'] = Profile.objects.order_by('-registration_date')[:5]
+        context['pins_count'] = Pin.objects.filter(author=user).count()
+        context['new_users'] = Profile.objects.filter(~Q(username=self_user.username)).order_by('-registration_date')[:5]
+        context['boards'] = boards
+        boards_pins_list = []
+        for board in boards:
+            board_pins = PinBoard.objects.filter(user=user, board=board)
+            boards_pins_list.append([board, board_pins[:3], board_pins.count])
+        context['boards_pins'] = boards_pins_list
+        context['likes_count'] = Like.objects.filter(liker=user).count()
 
         if self_user.get_followings().filter(following__username=user.username).exists():
             is_following = True
