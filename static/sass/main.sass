@@ -1,0 +1,224 @@
+@import "bourbon"
+@import "vars"
+@import "libs"
+
+// main-section
+.main
+  min-height: 100vh
+  padding: 50px 0
+  background-color: $secondary_color
+  .left-section-wrap
+    .profile-section
+      background-color: $main_color
+      text-align: center
+      padding: 40px 0
+      box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.10)
+      width: 100%
+      .avatar
+        margin: 0 auto
+        height: 90px
+        width: 90px
+        border-radius: 50%
+        background-size: cover
+      .username
+        padding-top: 15px
+        opacity: .95
+      .city
+        color: $triad
+        opacity: .6
+      .user-about
+        // width: 70%
+        opacity: .8
+        padding: 0 15%
+
+      .social-links
+        padding-top: 5px
+        .instagram-icon, .facebook-icon
+          display: inline-block
+          // float: left
+          border: 1px solid #dadada
+          border-radius: 50%
+          .fa
+            padding: 6px 7px
+            font-size: 20px
+            opacity: .7
+            color: darken(#22557e, 10%)
+
+      .button
+        display: inline-block
+        margin-top: 25px
+        display:block
+        background-color: $accent
+        padding: 8px 45px
+        border-radius: 20px
+        color: #fff
+        letter-spacing: 2px
+        text-transform: uppercase
+        font-size: rem(14px)
+        font-family: "OpenSansSemiBold", sans-serif
+        +mt(.05s)
+        &:hover
+          background-color: darken($accent, 5%)
+
+    .recommendation-section
+      margin-top: 35px
+      background-color: $main_color
+      text-align: center
+      padding: 20px
+      box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.10)
+      width: 100%
+      h3
+        margin: 0
+        // margin-left: 10px
+        text-transform: uppercase
+        font-size: rem(13px)
+        letter-spacing: 2px
+        font-family: "OpenSansSemiBold",sans-serif
+        line-height: 6px
+      .users-info
+        text-align: left
+        h4
+          display: inline-block
+          margin: 0
+          color: $triad
+          opacity: .6
+        h4.followers
+          margin-left: 10px
+        .info
+          display: inline-block
+          vertical-align: bottom
+          margin-left: 10px
+          max-width: 80%
+          h3
+            text-transform: none
+            letter-spacing: normal
+        .user-avatar
+          vertical-align: middle
+          display: inline-block
+          width: 42px
+          height: 42px
+          img
+            width: 100%
+            height: 100%
+            border-radius: 50%
+        .user-item
+          margin-top: 20px
+          width: 100%
+
+.right-section-wrap
+  .info-bar
+    // margin-left: 20px
+    // position: relative
+    background-color: $main_color
+    text-align: center
+    padding-top: 20px
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.10)
+    width: 100%
+    ul
+      list-style-type: none
+      margin: 0
+      padding: 0
+
+      li
+        display: inline-block
+        width: 19%
+        text-transform: uppercase
+        opacity: .8
+        letter-spacing: 1.5px
+        font-size: rem(14px)
+        // margin-left: 6%
+        &::after
+          content: ''
+          display: block
+          margin: 0 auto
+          width: 60%
+          height: 3px
+          background-color: #ccc
+          margin-top: 16px
+          opacity: 0
+          +mt(0.5s)
+        &:hover
+          &::after
+            opacity: 1
+            background-color: $accent
+        h1
+          margin-bottom: 10px
+          color: #000
+          letter-spacing: normal
+          font-family: "RobotoBold", sans-serif
+
+        a
+          color: $triad
+
+
+// board items
+
+.boards-wrap
+  margin-top: 32px
+  .bottom-boards
+    margin-top: 35px
+  .top-bar
+    padding: 20px 0 10px 0
+  .board-item
+    position: relative
+    height: 390px
+    width: 395px
+    max-width: 395px
+    background-color: #fff
+    overflow: hidden
+  .board-name
+    // padding-left: 10px
+    font-size: rem(19px)
+    display: inline-block
+    opacity: .9
+  .board-info
+    padding-left: 15px
+    display: inline-block
+  span
+    font-size: rem(14px)
+    color: $triad
+    opacity: .6
+    padding: 0 7px
+  span.pins
+    border-right: 1px solid #ccc
+  .subscribe-board-button
+    padding: 5px 12px
+    background-color: lighten($secondary_color, 2%)
+    color: $accent
+    float: right
+    margin-right: 10px
+    margin-top: -5px
+    border: 1px solid darken($secondary_color, 10%)
+    +mt(.5s)
+    &:hover
+      color: #fff
+      background-color: lighten($accent, 9%)
+
+.board-item
+  .board-inner-wrap
+    height: 100%
+    .images-bar
+      height: 83%
+      .images-wrapper
+        height: 100%
+    a
+      display: block
+    .image-top
+      width: 100%
+      height: 50%
+      overflow: hidden
+      img
+        margin: -75px 0 0 0px
+    .image
+      width: 50%
+      height: 50%
+      overflow: hidden
+      float: left
+      margin-top: 2px
+      &:last-child
+        padding-left: 2px
+      img
+        max-width: 100%
+
+
+@import "media"
