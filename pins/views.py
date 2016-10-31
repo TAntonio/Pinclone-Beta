@@ -9,9 +9,8 @@ from django.db.models import Q
 from django.conf import settings
 from braces import views
 from accounts.models import Profile
-from boards.models import BoardFollower
-from boards.models import Board
-from .models import Pin, Tag, PinBoard, md5
+from boards.models import BoardFollower, Board
+from .models import Pin, Tag, PinBoard, Like
 from .forms import PinCreateForm, PinUpdateForm, PinImageForm
 
 
@@ -201,6 +200,13 @@ class PinImageView(
 
         return super(PinImageView, self).form_valid(form)
 
+    def dispatch(self, request, *args, **kwargs):
+        slug = self.kwargs.get('slug')
+        author_of_pin = Pin.objects.filter(author=request.user, slug=slug)
+        if author_of_pin:
+            messages.add_message(self.request, messages.ERROR, "You can't pin image that you've created")
+            return redirect(author_of_pin[0].get_absolute_url())
+
     def get_success_url(self):
         return reverse_lazy('board:list_of_user')
 
@@ -212,6 +218,11 @@ class UnpinImageView(
     # post for production
     def get(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
+        author_of_pin = Pin.objects.filter(author=request.user, slug=slug)
+        if author_of_pin:
+            messages.add_message(self.request, messages.ERROR, "You can't unpin image that you've created")
+            return redirect(author_of_pin[0].get_absolute_url())
+
         pin = get_object_or_404(Pin, slug=slug)
         exists = PinBoard.objects.filter(user=self.request.user, pin=pin)
         if exists:
@@ -238,7 +249,7 @@ class FeedView(
         for board in following_boards:
             pins = PinBoard.objects.filter(board=board.board)
             pins_list.append(pins)
-        print(pins_list[0][0].pin.slug)
+        # print(pins_list[0][0].pin.slug)
         context['pins'] = pins_list
         return context
 
@@ -257,6 +268,38 @@ class PinsByTagView(
         pins = Tag.objects.filter(tag__iexact=tag)
         if pins:
             return pins
+
+
+class LikePinImageView(
+    views.LoginRequiredMixin,
+    generic.View
+):
+    # post for production
+    def get(self, request, *args, **kwargs):
+        slug = self.kwargs.get('slug')
+        pin = get_object_or_404(Pin, slug=slug)
+        _, created = Like.objects.get_or_create(liker=request.user, liked_pin=pin)
+        if not created:
+            messages.add_message(self.request, messages.ERROR, "You've already liked this pin")
+        return redirect(pin.get_absolute_url())
+
+
+class DislikePinImageView(
+    views.LoginRequiredMixin,
+    generic.View
+):
+    # post for production
+    def get(self, request, *args, **kwargs):
+        slug = self.kwargs.get('slug')
+        pin = get_object_or_404(Pin, slug=slug)
+        try:
+            like = Like.objects.get(liker=request.user, liked_pin=pin)
+            like.delete()
+        except Like.DoesNotExist:
+            messages.add_message(self.request, messages.ERROR, "First, you need to like this pin")
+        finally:
+            return redirect(pin.get_absolute_url())
+
 
 
 def page_not_found(request):
